@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script>
+
+data = [{"letter":"2000","frequency":30.3},{"letter":"2001","frequency":39.2},{"letter":"2002","frequency":31.1},{"letter":"2003","frequency":28.6},{"letter":"2004","frequency":24.8},{"letter":"2005","frequency":39.4},{"letter":"2006","frequency":26.0},{"letter":"2007","frequency":35.6},{"letter":"2008","frequency":60.3},{"letter":"2009","frequency":52.7},{"letter":"2010","frequency":54.2},{"letter":"2011","frequency":57.9},{"letter":"2012","frequency":19.8},{"letter":"2013","frequency":30.1},{"letter":"2014","frequency":82.0},{"letter":"2015","frequency":50.7},{"letter":"2016","frequency":25.8}];
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(20, "g");
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  x.domain(data.map(function(d) { return d.letter; }));
+  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -40)
+      .attr("x",-50)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Yearly Cumulative Snowfall (inches)");
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.letter); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.frequency); })
+      .attr("height", function(d) { return height - y(d.frequency)})
+               .on("mouseover", function(d) {
+
+          //Get this bar's x/y values, then augment for the tooltip
+          var xPosition = parseFloat(d3.select(this).attr("x")) + 20;
+          var yPosition = parseFloat(d3.select(this).attr("y")) - 10;
+
+          //Create the tooltip label
+          svg.append("text")
+             .attr("id", "tooltip")
+             .attr("x", xPosition)
+             .attr("y", yPosition)
+             .attr("text-anchor", "middle")
+             .attr("font-family", "sans-serif")
+             .attr("font-size", "11px")
+             .attr("font-weight", "bold")
+             .attr("fill", "black")
+             .text(d.frequency);
+
+         })
+         .on("mouseout", function() {
+         
+          //Remove the tooltip
+          d3.select("#tooltip").remove();
+          
+         });
+
+
+/*
+      svg.selectAll("text1")
+         .data(data)
+         .enter()
+         .append("text")
+         .text(function(d) {
+            return d.frequency;
+         })
+         .attr("text-anchor", "middle")
+         .attr("x", function(d) { return x(d.letter)+15; })
+         .attr("y", function(d) { return y(d.frequency)-5; })
+         .attr("font-family", "sans-serif")
+         .attr("font-size", "11px")
+         .attr("fill", "black");*/
+
+function type(d) {
+  d.frequency = +d.frequency;
+  return d;
+}
+
+</script>
